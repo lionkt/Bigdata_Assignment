@@ -1,3 +1,23 @@
+
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+//package org.apache.hadoop.examples;
+
 import java.io.IOException;
 import java.util.StringTokenizer;
 import java.util.Arrays;
@@ -19,7 +39,6 @@ import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Counters;
 
-
 public class Task3_BFS {
 
     // node class refer to http://irwenqiang.iteye.com/blog/1541559
@@ -33,69 +52,78 @@ public class Task3_BFS {
         private COLOR m_color;
 
         public TreeNode() {
-            this.m_id = "NULL";
-            this.m_distance = Integer.MAX_VALUE;
-            this.m_adj = "NULL";
-            this.m_color = COLOR.WHITE;
+            m_id = "NULL";
+            m_distance = Integer.MAX_VALUE;
+            m_adj = "NULL";
+            m_color = COLOR.WHITE;
         }
 
         public TreeNode(String id, String info) {
             // info的格式为 1 2 3 X|distance|color
             String[] temp = info.split("\\|");
-            this.m_id = id;
-            this.m_adj = temp[0];
-            this.m_color = COLOR.valueOf(temp[2]);
+            m_id = id;
+            m_adj = temp[0];
+            m_color = COLOR.valueOf(temp[2]);
             if (temp[1].equals("Integer.MAX_VALUE"))
-                this.m_distance = Integer.MAX_VALUE;
+                m_distance = Integer.MAX_VALUE;
             else
-                this.m_distance = Integer.parseInt(temp[1]);
+                m_distance = Integer.parseInt(temp[1]);
         }
 
         public String getId() {
-            return this.m_id;
+            return m_id;
         }
 
         public int getDistance() {
-            return this.m_distance;
+            return m_distance;
         }
 
         public String getAdj() {
-            return this.m_adj;
+            return m_adj;
         }
 
         public COLOR getColor() {
-            return this.m_color;
+            return m_color;
         }
 
         public void setId(String id) {
-            this.m_id = id;
+            m_id = id;
         }
 
         public void setDistance(int distance) {
-            this.m_distance = distance;
+            m_distance = distance;
         }
 
         public void setAdj(String adjInfo) {
-            this.m_adj = adjInfo;
+            m_adj = adjInfo;
         }
 
         public void setColor(COLOR color) {
-            this.m_color = color;
+            m_color = color;
         }
 
         public String getInfo(){
-            StringBuffer str = new StringBuffer();
-            str.append(m_adj);
-            str.append("|");
-            str.append(String.valueOf(this.m_distance));
-            str.append("|");
-            str.append(this.m_color);
-            return str.toString();
+            // StringBuffer str = new StringBuffer();
+            // str.append(m_adj);
+            // str.append("|");
+            // str.append(String.valueOf(this.m_distance));
+            // str.append("|");
+            // str.append(this.m_color);
+            // return str.toString();
+            return getAdj() + "|" + String.valueOf(m_distance) + "|" + String.valueOf(m_color);
+            
         }
 
     }
 
-    public static class BFSMapper extends Mapper<Object, Text, Text, Text> //<Text, Text, Text, Node>
+    public static class TreeNodeMapper extends Mapper<Object, Text, Text, Text> {
+        @Override
+        public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+            context.write(new Text(key.toString()), value);
+        }
+    }
+
+    public static class BFSMapper extends TreeNodeMapper
     {
         public static enum NewNode {
             NewNodeCounter
@@ -123,8 +151,8 @@ public class Task3_BFS {
                     temp.setDistance(thisDis);
                     temp.setId(adjNode[i]);
                     context.getCounter(NewNode.NewNodeCounter).increment(1);
-                    context.write(new Text(temp.getId()), new Text(temp.getInfo()));
-//                    super.map(new Text(temp.getID()), new Text(temp.getAllInfo()), context);
+//                    context.write(new Text(temp.getId()), new Text(temp.getInfo()));
+                    super.map(new Text(temp.getId()), new Text(temp.getInfo()), context);
                 }
             } else {
                 context.write(new Text(subLine[0]), new Text(subLine[1]));
@@ -205,7 +233,8 @@ public class Task3_BFS {
             job.setOutputKeyClass(Text.class);
             job.setOutputValueClass(Text.class);
             if (Iter_Num == 1)
-                FileInputFormat.addInputPath(job, new Path("./BFS-caseN/BFS-" + Iter_Num + "-out"));
+               FileInputFormat.addInputPath(job, new Path("./BFS-caseN/BFS-" + Iter_Num + "-out"));
+                // FileInputFormat.addInputPath(job, new Path("case1-adj-format"));
             else
                 FileInputFormat.addInputPath(job, new Path("./BFS-caseN/BFS-" + Iter_Num + "-out"));
             FileOutputFormat.setOutputPath(job, new Path("./BFS-caseN/BFS-" + (Iter_Num + 1) + "-out"));
