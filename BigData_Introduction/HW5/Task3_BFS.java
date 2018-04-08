@@ -1,23 +1,26 @@
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.StringTokenizer;
+import java.util.Arrays;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.IntWritable.Comparator;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.*;
-import org.apache.hadoop.util.Tool;
-import org.apache.hadoop.util.ToolRunner;
-import org.w3c.dom.Text;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.util.GenericOptionsParser;
+import org.apache.hadoop.mapreduce.Counter;
+import org.apache.hadoop.mapreduce.Counters;
+
 
 public class Task3_BFS {
-    public static final Log LOG = LogFactory.getLog("org.apache.hadoop.examples.GraphSearch");
 
     // node class refer to http://irwenqiang.iteye.com/blog/1541559
     public static class TreeNode {
@@ -195,7 +198,7 @@ public class Task3_BFS {
             Configuration conf = new Configuration();
             conf.setStrings("Iter_Num", String.valueOf(Iter_Num));
             Job job = new Job(conf, "BFS_" + String.valueOf(Iter_Num));
-            job.setJarByClass(Frontier_BFS.class);
+            job.setJarByClass(Task3_BFS.class);
             job.setMapperClass(BFSMapper.class);
             job.setCombinerClass(BFSReducer.class);
             job.setReducerClass(BFSReducer.class);
@@ -215,7 +218,7 @@ public class Task3_BFS {
 
         Configuration job2conf = new Configuration();
         Job job2 = new Job(job2conf, "Final");
-        job2.setJarByClass(Frontier_BFS.class);
+        job2.setJarByClass(Task3_BFS.class);
         job2.setMapperClass(BFSMapper2.class);
         job2.setReducerClass(BFSReducer2.class);
         job2.setCombinerClass(BFSReducer2.class);
