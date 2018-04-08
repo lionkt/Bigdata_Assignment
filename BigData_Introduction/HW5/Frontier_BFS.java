@@ -107,13 +107,8 @@ public class Frontier_BFS {
         }
     }
 
-    public static class NodeMapper extends Mapper<Object, Text, Text, Text> {
-        public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            context.write(new Text(key.toString()), new Text(value.toString()));
-        }
-    }
 
-    public static class BFSMapper extends NodeMapper //<Text, Text, Text, TreeNode>
+    public static class BFSMapper extends Mapper<Object, Text, Text, Text>
     {
         public static enum NewNode {
             NewNodeCounter
@@ -141,7 +136,7 @@ public class Frontier_BFS {
                     temp.setDistance(thisDis);
                     temp.setId(adjNode[i]);
                     context.getCounter(NewNode.NewNodeCounter).increment(1);
-                    super.map(new Text(temp.getId()), new Text(temp.getAllInfo()), context);
+                    context.write(new Text(temp.getId()), new Text(temp.getAllInfo()));
                 }
             } else {
                 context.write(new Text(subLine[0]), new Text(subLine[1]));

@@ -105,42 +105,6 @@ public class OutDegree {
 		}
 	}
 
-	// sort in shuffle phase, not used in this task2
-    public static class myComparator extends Comparator {
-        @SuppressWarnings("rawtypes")
-        public int compare(WritableComparable a, WritableComparable b) {
-            return 0;
-        }
-
-        public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {
-            byte[] _b1 = Arrays.copyOfRange(b1, s1 + 1, s1 + l1);
-            byte[] _b2 = Arrays.copyOfRange(b2, s2 + 1, s2 + l2);
-            String[] t1 = new String(_b1).split(" ");
-            String[] t2 = new String(_b2).split(" ");
-            int nA1 = 0;
-            int nA2 = Integer.parseInt(t1[0]);
-            int nB1 = 0;
-            int nB2 = Integer.parseInt(t2[0]);
-            if (t1.length > 1) {
-                nA1 = Integer.parseInt(t1[1]);
-            }
-            if (t2.length > 1) {
-                nB1 = Integer.parseInt(t2[1]);
-            }
-            int compare1 = nA1 - nB1;
-            int compare2 = nA2 - nB2;
-            if (compare1 != 0) {
-                return compare1;
-            } else {
-                if (compare2 != 0) {
-                    return -compare2;
-                } else {
-                    return 0;
-                }
-            }
-        }
-    }
-
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
 		String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
