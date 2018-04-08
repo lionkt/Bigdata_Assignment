@@ -41,69 +41,69 @@ import org.apache.hadoop.mapreduce.Counters;
 
 public class Frontier_BFS {
 
-    // node class refer to http://irwenqiang.iteye.com/blog/1541559
-    public static class Node {
+    // TreeNode class refer to http://irwenqiang.iteye.com/blog/1541559
+    public static class TreeNode {
         public enum COLOR {
             WHITE, GRAY, BLACK
         };
 
-        private String ID = "NULL";
-        private int Distance = Integer.MAX_VALUE;
-        private String AdjInfo = "NULL";
-        private COLOR Color = COLOR.WHITE;
+        private String m_id;
+        private int m_distance;
+        private String m_adjInfo;
+        private COLOR m_color;
 
-        public Node() {
-            Distance = Integer.MAX_VALUE;
-            Color = COLOR.WHITE;
-            AdjInfo = "NULL";
-            ID = "NULL";
+        public TreeNode() {
+            m_distance = Integer.MAX_VALUE;
+            m_color = COLOR.WHITE;
+            m_adjInfo = "NULL";
+            m_id = "NULL";
         }
 
-        public Node(String NodeID, String NodeInfo) {
+        public TreeNode(String NodeID, String NodeInfo) {
             String[] subinfo = NodeInfo.split("\\|");
-            ID = NodeID;
-            AdjInfo = subinfo[0];
+            m_id = NodeID;
+            m_adjInfo = subinfo[0];
             if (subinfo[1].equals("Integer.MAX_VALUE"))
-                Distance = Integer.MAX_VALUE;
+                m_distance = Integer.MAX_VALUE;
             else
-                Distance = Integer.parseInt(subinfo[1]);
-            Color = COLOR.valueOf(subinfo[2]);
+                m_distance = Integer.parseInt(subinfo[1]);
+            m_color = COLOR.valueOf(subinfo[2]);
         }
 
         public void setColor(COLOR color) {
-            this.Color = color;
+            this.m_color = color;
         }
 
         public void setDistance(int distance) {
-            this.Distance = distance;
+            this.m_distance = distance;
         }
 
-        public void setID(String ID) {
-            this.ID = ID;
+        public void setId(String id) {
+            this.m_id = id;
         }
 
         public void setAdjInfo(String Info) {
-            this.AdjInfo = Info;
+            this.m_adjInfo = Info;
         }
 
-        public String getID() {
-            return ID;
+        public String getId() {
+            return m_id;
         }
 
         public String getAdjInfo() {
-            return AdjInfo;
+            return m_adjInfo;
         }
 
         public COLOR getColor() {
-            return Color;
+            return m_color;
         }
 
         public int getDistance() {
-            return Distance;
+            return m_distance;
         }
 
         public String getAllInfo() {
-            return this.getAdjInfo() + "|" + String.valueOf(this.Distance) + "|" + String.valueOf(this.Color);
+            return this.getAdjInfo() + "|" + String.valueOf(this.m_distance) + "|" + String.valueOf(this.m_color);
         }
     }
 
@@ -113,7 +113,7 @@ public class Frontier_BFS {
         }
     }
 
-    public static class BFSMapper extends NodeMapper //<Text, Text, Text, Node>
+    public static class BFSMapper extends NodeMapper //<Text, Text, Text, TreeNode>
     {
         public static enum NewNode {
             NewNodeCounter
@@ -123,11 +123,11 @@ public class Frontier_BFS {
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             String oneLine = value.toString();
             String[] subLine = oneLine.split("\t");
-            Node thisNode = new Node(subLine[0], subLine[1]);
+            TreeNode thisNode = new TreeNode(subLine[0], subLine[1]);
             // 如果是灰色的，则进行bfs
-            if (thisNode.getColor().equals(Node.COLOR.GRAY)) {
-                thisNode.setColor(Node.COLOR.BLACK);
-                context.write(new Text(thisNode.getID()), new Text(thisNode.getAllInfo()));
+            if (thisNode.getColor().equals(TreeNode.COLOR.GRAY)) {
+                thisNode.setColor(TreeNode.COLOR.BLACK);
+                context.write(new Text(thisNode.getId()), new Text(thisNode.getAllInfo()));
                 String[] adjNode = thisNode.getAdjInfo().split(" ");
                 Configuration conf = context.getConfiguration();
                 int thisDis = Integer.parseInt(conf.get("Iter_Num"));
@@ -136,12 +136,12 @@ public class Frontier_BFS {
                 }
                 // 将子节点的距离+1
                 for (int i = 0; i < adjNode.length; i++) {
-                    Node temp = new Node();
-                    temp.setColor(Node.COLOR.GRAY);
+                    TreeNode temp = new TreeNode();
+                    temp.setColor(TreeNode.COLOR.GRAY);
                     temp.setDistance(thisDis);
-                    temp.setID(adjNode[i]);
+                    temp.setId(adjNode[i]);
                     context.getCounter(NewNode.NewNodeCounter).increment(1);
-                    super.map(new Text(temp.getID()), new Text(temp.getAllInfo()), context);
+                    super.map(new Text(temp.getId()), new Text(temp.getAllInfo()), context);
                 }
             } else {
                 context.write(new Text(subLine[0]), new Text(subLine[1]));
@@ -153,10 +153,10 @@ public class Frontier_BFS {
         @Override
         protected void reduce(Text key, Iterable<Text> values, Context context)
                 throws IOException, InterruptedException {
-            Node targetNode = new Node();
-            targetNode.setID(key.toString());
+            TreeNode targetNode = new TreeNode();
+            targetNode.setId(key.toString());
             for (Text temp : values) {
-                Node val = new Node(key.toString(), temp.toString());
+                TreeNode val = new TreeNode(key.toString(), temp.toString());
                 // 选择最深的颜色
                 if (targetNode.getColor().compareTo(val.getColor()) < 0)
                     targetNode.setColor(val.getColor());
@@ -173,9 +173,6 @@ public class Frontier_BFS {
 
     // 对所有点的信息再进行一次汇总，提取出距离信息
     public static class BFSMapper2 extends Mapper<Object, Text, Text, IntWritable> {
-
-        private Text word = new Text();
-
         @Override
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             String oneLine = value.toString();
@@ -183,8 +180,7 @@ public class Frontier_BFS {
             String[] subinfo = subline[1].split("\\|");
             if (subinfo[1].equals(String.valueOf(Integer.MAX_VALUE)))
                 return;
-            word.set(subline[0] + " " + subinfo[1]);
-            context.write(word, new IntWritable(Integer.parseInt(subinfo[1])));
+            context.write(new Text(subline[0]), new IntWritable(Integer.parseInt(subinfo[1])));
         }
     }
 
