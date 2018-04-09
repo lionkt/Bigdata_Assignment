@@ -110,8 +110,8 @@ public class Frontier_BFS {
 
     public static class BFSMapper extends Mapper<Object, Text, Text, Text>
     {
-        public static enum NewNode {
-            NewNodeCounter
+        public static enum NewCounter {
+            NewGreyCounter
         }
 
         @Override
@@ -136,7 +136,7 @@ public class Frontier_BFS {
                     temp.setColor(TreeNode.COLOR.GRAY);
                     temp.setDistance(thisDis);
                     temp.setId(adjNode[i]);
-                    context.getCounter(NewNode.NewNodeCounter).increment(1);
+                    context.getCounter(NewCounter.NewGreyCounter).increment(1);
                     context.write(new Text(temp.getId()), new Text(temp.getAllInfo()));
                 }
             } else {
@@ -216,7 +216,7 @@ public class Frontier_BFS {
             FileOutputFormat.setOutputPath(job, new Path("./BFS-caseN/BFS-" + (Iter_Num + 1) + "-out"));
 
             job.waitForCompletion(true);
-            if (job.getCounters().findCounter(BFSMapper.NewNode.NewNodeCounter).getValue() == 0)
+            if (job.getCounters().findCounter(BFSMapper.NewCounter.NewGreyCounter).getValue() == 0)
                 break;
             Iter_Num++;
         }
