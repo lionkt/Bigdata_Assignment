@@ -125,7 +125,8 @@ public class Frontier_BFS {
                 context.write(new Text(thisNode.getId()), new Text(thisNode.getAllInfo()));
                 String[] adjNode = thisNode.getAdjInfo().split(" ");
                 Configuration conf = context.getConfiguration();
-                int thisDis = Integer.parseInt(conf.get("Iter_Num"));
+                int thisDis = thisNode.getDistance() + 1;
+                // int thisDis = Integer.parseInt(conf.get("Iter_Num"));
                 if (adjNode[0].equals("NULL")){
                     return;
                 }
@@ -200,7 +201,7 @@ public class Frontier_BFS {
         int Iter_Num = 1;
         while (true) {
             Configuration conf = new Configuration();
-            conf.setStrings("Iter_Num", String.valueOf(Iter_Num));
+            // conf.setStrings("Iter_Num", String.valueOf(Iter_Num));
             Job job = new Job(conf, "BFS_" + String.valueOf(Iter_Num));
             job.setJarByClass(Frontier_BFS.class);
             job.setMapperClass(BFSMapper.class);
