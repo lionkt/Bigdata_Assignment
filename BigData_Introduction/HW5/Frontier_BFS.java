@@ -125,7 +125,7 @@ public class Frontier_BFS {
                 context.write(new Text(thisNode.getId()), new Text(thisNode.getAllInfo()));
                 String[] adjNode = thisNode.getAdjInfo().split(" ");
                 Configuration conf = context.getConfiguration();
-                int thisDis = Integer.parseInt(conf.get("Iter_Num"));
+                int thisDis = Integer.parseInt(conf.get("Iter_Times"));
                 if (adjNode[0].equals("NULL")){
                     return;
                 }
@@ -197,27 +197,27 @@ public class Frontier_BFS {
 
 
     public static void main(String[] args) throws Exception {
-        int Iter_Num = 1;
+        int Iter_Times = 1;
         while (true) {
             Configuration conf = new Configuration();
-            conf.setStrings("Iter_Num", String.valueOf(Iter_Num));
-            Job job = new Job(conf, "BFS_" + String.valueOf(Iter_Num));
+            conf.setStrings("Iter_Times", String.valueOf(Iter_Times));
+            Job job = new Job(conf, "BFS_" + String.valueOf(Iter_Times));
             job.setJarByClass(Frontier_BFS.class);
             job.setMapperClass(BFSMapper.class);
             job.setCombinerClass(BFSReducer.class);
             job.setReducerClass(BFSReducer.class);
             job.setOutputKeyClass(Text.class);
             job.setOutputValueClass(Text.class);
-            if (Iter_Num == 1)
-                FileInputFormat.addInputPath(job, new Path("./BFS-caseN/BFS-" + Iter_Num + "-out"));
+            if (Iter_Times == 1)
+                FileInputFormat.addInputPath(job, new Path("./BFS-caseN/BFS-" + Iter_Times + "-out"));
             else
-                FileInputFormat.addInputPath(job, new Path("./BFS-caseN/BFS-" + Iter_Num + "-out"));
-            FileOutputFormat.setOutputPath(job, new Path("./BFS-caseN/BFS-" + (Iter_Num + 1) + "-out"));
+                FileInputFormat.addInputPath(job, new Path("./BFS-caseN/BFS-" + Iter_Times + "-out"));
+            FileOutputFormat.setOutputPath(job, new Path("./BFS-caseN/BFS-" + (Iter_Times + 1) + "-out"));
 
             job.waitForCompletion(true);
             if (job.getCounters().findCounter(BFSMapper.NewNode.NewNodeCounter).getValue() == 0)
                 break;
-            Iter_Num++;
+            Iter_Times++;
         }
 
 
@@ -229,7 +229,7 @@ public class Frontier_BFS {
         job2.setCombinerClass(BFSReducer2.class);
         job2.setOutputKeyClass(Text.class);
         job2.setOutputValueClass(IntWritable.class);
-        FileInputFormat.addInputPath(job2, new Path("./BFS-caseN/BFS-" + Iter_Num + "-out"));
+        FileInputFormat.addInputPath(job2, new Path("./BFS-caseN/BFS-" + Iter_Times + "-out"));
         FileOutputFormat.setOutputPath(job2, new Path("./BFS-caseN/BFS-FINAL-out"));
         job2.setNumReduceTasks(1);
         System.exit(job2.waitForCompletion(true) ? 0 : 1);
