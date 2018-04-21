@@ -1,7 +1,10 @@
 """SimpleApp.py"""
 from pyspark import SparkContext,SparkConf
 
-logFile = "/user/qinwei/README.md"  # Should be some file on your system
+# logFile = "/user/qinwei/README.md"  # Should be some file on your system
+logFile = "/user/a2017210938/README.md"  # Should be some file on your system
+
+
 conf = SparkConf().setAppName("SimpleApp")
 sc = SparkContext(conf = conf)
 logData = sc.textFile(logFile).cache()

@@ -1,0 +1,1 @@
+spark-submit --name KmeansTest --verbose --master yarn-cluster --executor-memory 4g --num-executors 1 --executor-cores 1 KmeansTest.py
