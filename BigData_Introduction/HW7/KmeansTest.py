@@ -1,5 +1,5 @@
 """KmeansTest.py"""
-from numpy import array
+import numpy as np
 
 from pyspark import SparkContext, SparkConf
 from pyspark.mllib.clustering import KMeans, KMeansModel
@@ -12,7 +12,7 @@ sc = SparkContext(conf = conf)
 # Load and parse the data
 logFile = "/user/a2017210938/kddcup_convert.data"  # Should be some file on your system
 data = sc.textFile(logFile)
-parsedData = data.map(lambda line: array([float(x) for x in line.split(',')]))
+parsedData = data.map(lambda line: np.array([float(x) for x in line.split(',')]))
 
 # Build the model (cluster the data)
 K = 23
@@ -35,5 +35,11 @@ print("sum of cost using mllib:%.2f" % sameModel.computeCost(parsedData))
 print("Within Set Sum of Squared Error = " + str(WSSSE) + "\n")
 for th_ in range(len(sameModel.clusterCenters)):
     print(sameModel.clusterCenters[th_])
+prediction = sameModel.predict(parsedData)
+cluster_counter = np.zeros(K)
+for i in range(len(prediction)):
+    cluster_counter[prediction[i]] += 1
+for i in range(K):
+    print("cluster " + str(i) + "has " + str(cluster_counter[i]) + "points")
 
 sc.stop()
