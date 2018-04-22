@@ -16,7 +16,7 @@ parsedData = data.map(lambda line: np.array([float(x) for x in line.split(',')])
 
 # Build the model (cluster the data)
 K = 23
-clusters = KMeans.train(parsedData, K, maxIterations=1000, initializationMode="random")
+clusters = KMeans.train(parsedData, K, maxIterations=5000, initializationMode="random")
 
 # Evaluate clustering by computing Within Set Sum of Squared Errors
 def error(point):
@@ -25,21 +25,21 @@ def error(point):
 
 WSSSE = parsedData.map(lambda point: error(point)).reduce(lambda x, y: x + y)
 
-# Save and load model
-clusters.save(sc, "./KMeansModel")
-sameModel = KMeansModel.load(sc, "./KMeansModel")
+# # Save and load model
+clusters.save(sc, "./KMeansModel-new")
+sameModel = KMeansModel.load(sc, "./KMeansModel-new")
 
 # output kmeans center
 print("center number:%d" % len(sameModel.clusterCenters))       # KMeansModel.clusterCenters get 2-dim list
 print("sum of cost using mllib:%.2f" % sameModel.computeCost(parsedData))
 print("Within Set Sum of Squared Error = " + str(WSSSE) + "\n")
-for th_ in range(len(sameModel.clusterCenters)):
-    print(sameModel.clusterCenters[th_])
-prediction = sameModel.predict(parsedData)
+# for th_ in range(len(sameModel.clusterCenters)):
+#     print(sameModel.clusterCenters[th_])
+prediction = sameModel.predict(parsedData).collect()            # use collect() to transform pipelinedRDD to list
 cluster_counter = np.zeros(K)
 for i in range(len(prediction)):
     cluster_counter[prediction[i]] += 1
 for i in range(K):
-    print("cluster " + str(i) + "has " + str(cluster_counter[i]) + "points")
+    print("cluster " + str(i) + " has " + str(cluster_counter[i]) + " points")
 
 sc.stop()
